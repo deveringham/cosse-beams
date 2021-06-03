@@ -185,6 +185,7 @@ def get_S_global(node_matrix, element_matrix, E, I):
 
 
 def get_S_loc(node_matrix, element_matrix, element_nr, E, I):
+    
     T = get_transformation(node_matrix, element_matrix, element_nr)  # transformation from reference element [0,1] to element [x_i, x_i+1]
     element_length = T(1) - T(0)
     
