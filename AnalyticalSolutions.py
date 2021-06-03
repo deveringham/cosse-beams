@@ -48,14 +48,13 @@ class Cantilever:
         
         EI = self.E * self.I
         
-        a1 = self.a
-        a2 = self.b
+        c1 = self.a
+        c2 = self.b
         
-        a3 = (self.ML + self.QL*self.L + self.q1(self.L)*self.L - self.q2(self.L))/(2*EI)
-
-        a4 = -(self.QL + self.q1(self.L))/(6*EI)
+        c3 = (self.ML + self.QL*self.L + self.q1(self.L)*self.L - self.q2(self.L))/(2*EI)
+        c4 = -(self.QL + self.q1(self.L))/(6*EI)
         
-        return [a1,a2,a3,a4]
+        return [c1,c2,c3,c4]
     
     
     def get_solution_list(self, x):
@@ -102,17 +101,17 @@ class Cantilever:
     
 class BothEnds:
     
-    def __init__(self, A1, B1, A2, B2, x0, case, c=-0.01, E=1, I=1, L=5, q= lambda x: x):
+    def __init__(self, a0, aL, M0, ML, x0, case, c=-0.01, E=1, I=1, L=5, q= lambda x: x):
         
         self.E = E
         self.I = I
         
         self.L = L
         
-        self.A1 = A1
-        self.B1 = B1
-        self.A2 = A2
-        self.B2 = B2
+        self.a0 = a0
+        self.aL = aL
+        self.M0 = M0
+        self.ML = ML
         self.x0 = x0
         
         self.c = c
@@ -140,29 +139,19 @@ class BothEnds:
             self.q1 = lambda x: 0 if x<x0 else 1
             self.q2 = lambda x: 0 if x<x0 else c*x
             self.q3 = lambda x: 0 if x<x0 else c*x*x/2
-            self.q3 = lambda x: 0 if x<x0 else c*x*x*x/6
+            self.q4 = lambda x: 0 if x<x0 else c*x*x*x/6
             
         
     def get_coefficients(self):
         
         EI = self.E * self.I
+
+        c1 = self.a0
+        c3 = -self.M0/(2*EI)
+        c4 = (self.M0 + self.ML - self.q2(self.L))/(6*self.L*EI)
+        c2 = (self.aL - self.q4(self.L)/EI - c1 - c3*self.L**2 - c4*self.L**3)/self.L
         
-        a1 = self.A1
-        a2 = self.B1
-        
-        
-        phi1 = self.q4(self.L)/EI
-        phi2 = self.q3(self.L)/EI
-        
-        
-        a4 = 2*(self.A1 - self.A2) + self.L*(self.B1 + self.B2) - self.L*phi2 + 2*phi1
-        a4 = a4 / (self.L ** 3)
-        
-        a3 = (-3/2) * a4 * self.L **3 + (self.L/2)*(self.B2 - self.B1) - self.L*phi2/2
-        
-        a3 = a3/(self.L*self.L)
-        
-        return [a1, a2, a3, a4]
+        return [c1, c2, c3, c4]
     
     
     def get_solution_list(self, x):
