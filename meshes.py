@@ -44,8 +44,8 @@ def get_mesh_1D(N, limits=[0,1], plot_mesh=False):
 
 	# Generate nodes, elems, faces
 	nodes = np.linspace(limits[0],limits[1],N)
-	elems = [[n,n+1] for n in range(N)]
-	faces = [[0,0], [N-1,1]]
+	elems = np.array([[n,n+1] for n in range(N-1)])
+	faces = np.array([[0,0], [N-1,1]])
 
 	# Do mesh plot
 	if (plot_mesh):
