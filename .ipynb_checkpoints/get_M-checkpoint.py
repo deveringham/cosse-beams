@@ -96,7 +96,7 @@ def get_M_loc(node_matrix, element_matrix, element_nr):
         [-13,  -3, -22,   4]
         ])
     
-    M_loc = (1 / element_length) * M_ref
+    M_loc = (1 / element_length) * M_ref / 420
     return M_loc
 
 
