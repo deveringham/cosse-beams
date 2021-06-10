@@ -9,10 +9,10 @@
 #                                                         
 #######
 # Project Numerics, COSSE Programme 2021
-# Dylan Everingham, Sebastian Myrbäck,
-# 	Carsten van de Kamp, Sergi Andreu
-# 25.05.21
+# Carsten van de Kamp, Sergi Andreu,
+# Sebastian Myrbäck, Dylan Everingham
 #
+# 25.05.21
 #######
 
 #######

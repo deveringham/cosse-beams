@@ -3,7 +3,7 @@ import numpy as np
 
 class Cantilever:
     
-    def __init__(self, a, b, QL, ML, x0, case, c=-0.01, E=1, I=1, L=5, q=lambda x: x):
+    def __init__(self, a=0, b=0, QL=0, ML=0, x0=0, case='arbitrary function', c=-0.01, E=1, I=1, L=5, q=lambda x: x):
         
         self.E = E
         self.I = I
@@ -41,6 +41,7 @@ class Cantilever:
             self.q2 = lambda x: 0 if x<x0 else c*x
             self.q3 = lambda x: 0 if x<x0 else c*x*x/2
             self.q3 = lambda x: 0 if x<x0 else c*x*x*x/6
+            self.q4 = lambda x: 0 if x<x0 else c*x*x*x*x/24
 
 
         
@@ -101,7 +102,7 @@ class Cantilever:
     
 class BothEnds:
     
-    def __init__(self, a0, aL, M0, ML, x0, case, c=-0.01, E=1, I=1, L=5, q= lambda x: x):
+    def __init__(self, a0=0, aL=0, M0=0, ML=0, x0=0, case='arbitrary function', c=-0.01, E=1, I=1, L=5, q= lambda x: x):
         
         self.E = E
         self.I = I
