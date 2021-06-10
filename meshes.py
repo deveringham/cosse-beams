@@ -11,8 +11,10 @@
 # Project Numerics, COSSE Programme 2021
 # Carsten van de Kamp, Sergi Andreu,
 # Sebastian Myrbäck, Dylan Everingham
-#
 # 25.05.21
+#
+# meshes.py
+# Helper functions to generate meshes.
 #######
 
 #######
