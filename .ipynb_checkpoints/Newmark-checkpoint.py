@@ -1,5 +1,7 @@
 import numpy as np
-import numpy.linalg.solve as Solve
+#import numpy.linalg.solve as Solve
+from numpy.linalg import solve as Solve
+from scipy.sparse.linalg import spsolve
 
 class Newmark:
     
@@ -35,7 +37,7 @@ class Newmark:
         
     def get_ustars(self, u, up, upp, h):
 
-        ustar = u + up*h + (0.5 - self.beta)*upp*h**2
+        ustar = u + h*up + h**2*(0.5 - self.beta)*upp
         ustarp = up + (1 - self.gamma)*upp*h
 
         return ustar, ustarp
@@ -45,17 +47,24 @@ class Newmark:
     
     def solver(self, u):
         
+        
         #All matrices and vectors are given as numpy arrays
         rhs = self.f - self.Se.dot(u)
+
         
-        return Solve(self.Me, rhs)
+        #sol = Solve(self.Me, rhs)
+        sol = spsolve(self.Me, rhs)
+        
+        return sol
     
     
-    def get_next(self, ustar, upstar, upp):
+    def get_next(self, ustar, upstar, upp, h):
         
         unext = ustar + self.beta*upp*h**2
         
         upnext = upstar + self.gamma*upp*h
+        
+        return unext, upnext
         
     
     def run(self, niterations, log_values = True):
@@ -78,9 +87,10 @@ class Newmark:
             
             #NOTE THAT THE SOLVER DOES NOT NEED ustarp
             
+            
             upp = self.solver(ustar)
             
-            u, up = get_next(ustar, upstar, upp)
+            u, up = self.get_next(ustar, upstar, upp, h)
             
             if log_values:
                 
