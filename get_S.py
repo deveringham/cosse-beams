@@ -3,12 +3,14 @@ from scipy.sparse import csr_matrix
 import numpy as np
 
 def get_extended_q_vector(node_matrix, element_matrix, q, boundary_conditions, two_sided_support=False):
-    # Extend the load vector q with boundary conditions to obtain the rhs of the system
-    # **boundary_conditions is a dict that contains the boundary conditions for either case
-    # two_sided_support = True, corresponds to a beam supported at both ends
-    # possible keys in the dictionary are M0, ML, a0, aL 
-    # two_sided_support = False, corresponds to a beam supported at the left end (x=0) only (default)
-    # possible keys in the dictionary are QL, ML, a, b 
+    """ 
+    Extend the load vector q with boundary conditions to obtain the rhs of the system
+    **boundary_conditions is a dict that contains the boundary conditions for either case
+    two_sided_support = True, corresponds to a beam supported at both ends
+    possible keys in the dictionary are M0, ML, a0, aL 
+    two_sided_support = False, corresponds to a beam supported at the left end (x=0) only (default)
+    possible keys in the dictionary are QL, ML, a, b 
+    """ 
 
     q_vec = get_q_vector(node_matrix, element_matrix, q)
     q_vec_ext = np.concatenate((q_vec, [0,0]))
@@ -44,7 +46,9 @@ def get_extended_q_vector(node_matrix, element_matrix, q, boundary_conditions, t
 
 
 def get_q_vector(node_matrix, element_matrix, q):
-    # Build load vector
+    """
+    Build load vector
+    """
     
     # Number of nodes, elements and form functions
     n_p = np.shape(node_matrix)[0]
@@ -77,19 +81,21 @@ def get_q_vector(node_matrix, element_matrix, q):
 
 
 def get_q_loc(node_matrix, element_matrix, element_nr, q):
-    # Compute the q vector contributions to one element
-    # Use numerical quadrature if q is not a constant
+    """
+    Compute the q vector contributions to one element
+    Use numerical quadrature if q is not a constant
+    """
     
     T = get_transformation(node_matrix, element_matrix, element_nr)  # transformation from reference element [0,1] to element [x_i, x_i+1]
-    element_length = T(1) - T(0)
+    h = T(1) - T(0)  # length of the element
     
     # If q is a function, compute load vector with quadrature
     if callable(q):     
         # Form functions phi_1 bar to phi_4 bar 
         phi1 = lambda z: 1 - 3*z**2 + 2*z**3       # phi_1 bar 
-        phi2 = lambda z: z * (z-1)**2
+        phi2 = lambda z: (z * (z-1)**2) * h
         phi3 = lambda z: 3*z**2 - 2*z**3
-        phi4 = lambda z: z**2 * (z-1)
+        phi4 = lambda z: (z**2 * (z-1)) * h
         phis = [phi1, phi2, phi3, phi4]
         
         # Define a local stiffness matrix for one element. Size 4 since we have 4 form functions
@@ -97,24 +103,27 @@ def get_q_loc(node_matrix, element_matrix, element_nr, q):
         
         for i in range(4):
             # We integrate over a reference element [0,1]. Variable transformation defined by T(z).
-            # Because of the transformation we multiply by the Jacobian determinant of the transformation which is element_length
+            # Because of the transformation we multiply by the Jacobian determinant of the transformation,
+            # which is the length of the element h
             
             integrand = lambda z: phis[i](z) * q(T(z)) 
-            q_vec_loc[i] = integrate.quadrature(integrand, 0, 1)[0] * element_length
+            q_vec_loc[i] = integrate.quadrature(integrand, 0, 1)[0] * h
         return q_vec_loc
 
     # If q is constant, we can compute the integrals analytically
-    phi_integrals_exact = np.array([1/2, 1/12, 1/2, -1/12])
-    q_vec_loc = q * element_length * phi_integrals_exact
+    phi_integrals_exact = np.array([1/2, 1/12*h, 1/2, -1/12*h])
+    q_vec_loc = q * h * phi_integrals_exact
     return q_vec_loc
 
 
 
 def get_extended_S(node_matrix, element_matrix, E, I, two_sided_support=False):
-    # Extend the stiffness matrix S
-    # two_sided_support = True,  corresponds to a beam supported at both ends
-    # two_sided_support = False, corresponds to a beam supported at the left
-    # end (x=0) only and the right end is freee (default)
+    """
+    Extend the stiffness matrix S
+    two_sided_support = True,  corresponds to a beam supported at both ends
+    two_sided_support = False, corresponds to a beam supported at the left
+    end (x=0) only and the right end is freee (default)
+    """
     
     n_p = np.shape(node_matrix)[0]
 
@@ -142,7 +151,9 @@ def get_extended_S(node_matrix, element_matrix, E, I, two_sided_support=False):
     
 
 def get_S_global(node_matrix, element_matrix, E, I):
-    # Build matrix
+    """
+    Build matrix
+    """
     
     # number of nodes, elements and form functions
     n_p = np.shape(node_matrix)[0]
@@ -185,8 +196,11 @@ def get_S_global(node_matrix, element_matrix, E, I):
 
 
 def get_S_loc(node_matrix, element_matrix, element_nr, E, I):
+    """
+    Generate local stiffness matrix
+    """ 
     T = get_transformation(node_matrix, element_matrix, element_nr)  # transformation from reference element [0,1] to element [x_i, x_i+1]
-    element_length = T(1) - T(0)
+    h = T(1) - T(0)  # length of the element
     
     
     # E and/or I is not constant and we should compute S by numerical quadrature
@@ -202,9 +216,9 @@ def get_S_loc(node_matrix, element_matrix, element_nr, E, I):
 
         # Second derivative of form functions phi_1 bar to phi_4 bar wrt z
         phi1_zz = lambda z: 12*z-6      # second derivative of phi_1 bar to z
-        phi2_zz = lambda z: 6*z-4
+        phi2_zz = lambda z: (6*z-4) * h
         phi3_zz = lambda z: 6-12*z
-        phi4_zz = lambda z: 6*z-2
+        phi4_zz = lambda z: (6*z-2) * h
         
         phis_zz = [phi1_zz, phi2_zz, phi3_zz, phi4_zz]
         
@@ -214,10 +228,10 @@ def get_S_loc(node_matrix, element_matrix, element_nr, E, I):
         for i in range(4):
             for j in range(i):
                 # We integrate over a reference element [0,1]. Variable transformation defined by T(z).
-                # Because of the transformation we multiply by the Jacobian determinant of the transformation which is element_length
-                # Because of the transformation we replace derivativs wrt x by derivatives wrt z. Chain rule implies divisoin by element_length^2 per second derivative (2x)
+                # Because of the transformation we multiply by the Jacobian determinant of the transformation which is the length of the element h
+                # Because of the transformation we replace derivativs wrt x by derivatives wrt z. Chain rule implies divisoin by h^2 per second derivative (2x)
                 integrand = lambda z: phis_zz[i](z) * phis_zz[j](z) * E(T(z)) * I(T(z))
-                S_loc[i,j] = integrate.quadrature(integrand, 0, 1)[0] / element_length**3
+                S_loc[i,j] = integrate.quadrature(integrand, 0, 1)[0] / h**3
                 # Matrix is symmetric:
                 S_loc[j,i] =  S_loc[i,j] 
         return S_loc
@@ -225,27 +239,31 @@ def get_S_loc(node_matrix, element_matrix, element_nr, E, I):
     
     # Assuming E and I are constants 
     ## Matrix entries in S_ref are exact results of the integrals of the form functions over the reference element [0,1]
-    ## Because of the transformation we multiply by the Jacobian determinant of the transformation which is element_length
-    ## Because of the transformation we replace derivativs wrt x by derivatives wrt z. Chain rule implies divisoin by element_length^2 per second derivative (2x)
+    ## Because of the transformation we multiply by the Jacobian determinant of the transformation which is the length of the element h
+    ## Because of the transformation we replace derivativs wrt x by derivatives wrt z. Chain rule implies divisoin by h^2 per second derivative (2x)
     S_ref = np.array([
-        [ 12,  6, -12,  6],
-        [  6,  4,  -6,  2],
-        [-12, -6,  12, -6],
-        [  6,  2,  -6,  4]
+        [ 12  ,  6*h   , -12  ,  6*h   ],
+        [  6*h,  4*h**2,  -6*h,  2*h**2],
+        [-12  , -6*h   ,  12  , -6*h   ],
+        [  6*h,  2*h**2,  -6*h,  4*h**2]
         ])
     
-    S_loc = E * I / element_length**3 * S_ref
+    S_loc = E * I * S_ref / h**3
     return S_loc
 
 
 
 def get_transformation(node_matrix, element_matrix, element_nr):
+    """
+    Get transformation function for the transformation from the reference element [0,1] to an arbitrary element [x_i, x_i+1]
+    """
+    
     x1 = node_matrix[element_matrix[element_nr, 0]]
     x2 = node_matrix[element_matrix[element_nr, 1]]
   
-    dx = x2 - x1 # length of interval
+    h = x2 - x1 # length of element
     
-    T = lambda z: x1 + dx*z   # transformation from reference element [0,1] to element [x_i, x_i+1]
+    T = lambda z: x1 + h*z   # transformation from reference element [0,1] to element [x_i, x_i+1]
     return T
 
 

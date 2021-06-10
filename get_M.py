@@ -17,21 +17,7 @@ def get_extended_M(node_matrix, element_matrix, mu, two_sided_support=False):
     indptr = np.hstack((M.indptr, M.indptr[-1], M.indptr[-1]))  # fix the pointers such that we can change the shape
     M_ext = csr_matrix((M.data, M.indices, indptr), shape=(2*n_p+2, 2*n_p+2))
     
-    
-    #WHICH CHANGES SHOULD WE MAKE TO THE EXTENDED MASS MATRIX, DEPENDING ON THE B.C.?
-    #The following are probably wrong: 
-    
-    M_ext[0, 2*n_p] = 1  # adds e0 to 2*n_p+1'th column 
-    M_ext[2*n_p, 0] = 1  # adds e0.T to 2*n_p+1'th row
-    
-    if two_sided_support:
-        M_ext[2*n_p-2, -1] = -1  # hstacks -eL to the right
-        M_ext[-1, 2*n_p-2] = -1  # vstacks -eL to the bottom
-        return M_ext
-       
-    M_ext[1, -1] = 1  # hstacks d0 to the right
-    M_ext[-1, 1] = 1  # vstacks d0.T to the bottom
-    
+        
     #make it possible to input mu (mass density) as a distribution, not only a constant
     return M_ext
     
@@ -39,9 +25,9 @@ def get_extended_M(node_matrix, element_matrix, mu, two_sided_support=False):
     
 
 def get_M_global(node_matrix, element_matrix, mu):
-    
+    """
     #IMPLEMENT THE MASS DENSITY MU
-    
+    """
     # Build matrix
     
     # number of nodes, elements and form functions
@@ -60,7 +46,7 @@ def get_M_global(node_matrix, element_matrix, mu):
     # Hence all even indices (starting at 0) correspond to form functions 1 and 3, defining the values in the nodes x_i
     # All odd indices correspond to form functions 2 and 4, which define the derivative in x_i, but do not change the value in the nodes
     for k in np.arange(0, n_e):
-        M_loc = get_M_loc(node_matrix, element_matrix, k)
+        M_loc = get_M_loc(node_matrix, element_matrix, k, mu)
         ii[k,:] = np.array([
             [e[k,0]  , e[k,0]  , e[k,0]  , e[k,0]],
             [e[k,0]+1, e[k,0]+1, e[k,0]+1, e[k,0]+1],
@@ -84,20 +70,21 @@ def get_M_global(node_matrix, element_matrix, mu):
 
 
 
-def get_M_loc(node_matrix, element_matrix, element_nr):
+def get_M_loc(node_matrix, element_matrix, element_nr, mu):
     T = get_transformation(node_matrix, element_matrix, element_nr)  # transformation from reference element [0,1] to element [x_i, x_i+1]
-    element_length = T(1) - T(0)
+    h = T(1) - T(0)
     
-    
-    M_ref = np.array([
-        [156,  22,  54, -13],
-        [ 22,  14,  13,  -3],
-        [ 54,  13,  16, -22],
-        [-13,  -3, -22,   4]
-        ])
-    
-    M_loc = (1 / element_length) * M_ref / 420
-    return M_loc
+    if not callable(mu):
+        
+        M_ref = np.array([
+            [156  ,  22*h   ,  54  , -13*h   ],
+            [ 22*h,   4*h**2,  13*h,  -3*h**2],
+            [ 54  ,  13*h   , 156  , -22*h   ],
+            [-13*h,  -3*h**2, -22*h,   4*h**2]
+            ])
+        
+        M_loc = (1/420) * h * mu * M_ref 
+        return M_loc
 
 
 
