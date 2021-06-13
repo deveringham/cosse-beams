@@ -61,11 +61,11 @@ class Eigenvalues:
         self.Me = Me    # extended mass matrix
         self.Se = Se    # extended stiffness matrix
 
-        self.A = inv(Se) @ Me    # eigenvalue operator
+        self.A = inv(self.Se) @ self.Me    # eigenvalue operator
 
         # Matrix dimensions
-        self.N = np.shape(M)[0]
-        self.K = np.shape(Se)[0] - self.N
+        self.N = np.shape(self.M)[0]
+        self.K = np.shape(self.Se)[0] - self.N
 
     def get_eigen(self):
         # Calculates the eigenvalues and eigenvectors corresponding
