@@ -72,7 +72,7 @@ class Eigenvalues:
         # to non-zero eigenvalues of A
         # Returns: arrays of non-zero eigenvalues and corresponding
         # eigenvectors
-        A = self.A
+        A = self.A.toarray()
         eigvals, eigvecs = np.linalg.eig(A)
         eigvals = eigvals[np.where(eigvals > 0)]
         eigvecs = eigvecs[np.where(eigvals > 0)]
@@ -101,14 +101,14 @@ class Eigenvalues:
         assert np.shape(w0)[0] == N
 
         for k in range(N-K):
-            wk = eigvecs[:, k][: N]
+            wk = eigvecs[k][:N]
             assert np.linalg.norm(wk) != 0.0
 
             omegak = 1/np.sqrt(eigvals[k])
             alphak = (wk.T @ M @ w0)/(wk.T @ M @ wk)
             betak = (wk.T @ M @ wp0)/(wk.T @ M @ wk)
             # use outer product to keep the form of a matrix
-            u = u + np.outer(eigvecs[:, k], alphak*np.cos(omegak*times) + (betak/omegak)*np.sin(omegak*times))
+            u = u + np.outer(eigvecs[k], alphak*np.cos(omegak*times) + (betak/omegak)*np.sin(omegak*times))
 
         w = u[:N, :]
         mu = u[N:, :]
