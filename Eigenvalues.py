@@ -114,35 +114,3 @@ class Eigenvalues:
         mu = u[N:, :]
 
         return w, mu
-
-    def run(self, niterations, log_values=True):
-        assert self.uniform
-        h = self.h
-
-        t = 0
-
-        # Initialize the values at the initial b.c.
-        u = self.u1
-        up = self.up1
-        upp = self.upp1
-
-        for i in range(niterations):
-
-            t += h
-
-            ustar, upstar = self.get_ustars(u, up, upp, h)
-
-            # NOTE THAT THE SOLVER DOES NOT NEED ustarp
-
-            upp = self.solver(ustar)
-
-            u, up = self.get_next(ustar, upstar, upp, h)
-
-            if log_values:
-                self.results["u"].append(u)
-                self.results["up"].append(up)
-                self.results["upp"].append(upp)
-                self.results["h"].append(h)
-                self.results["t"].append(t)
-
-        return u, up, upp, t
