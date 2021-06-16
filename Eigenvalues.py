@@ -66,6 +66,8 @@ class Eigenvalues:
         # Matrix dimensions
         self.N = np.shape(self.M)[0]
         self.K = np.shape(self.Se)[0] - self.N
+        
+        assert self.K == 2
 
     def get_eigen(self):
         # Calculates the eigenvalues and eigenvectors corresponding
@@ -77,23 +79,28 @@ class Eigenvalues:
         # eigvals, eigvecs = np.linalg.eig(A)
 
         # Attempt with sparse (scipy)
-        A = self.A
-        # Extract eigenvalues and eigenvectors to A (all but two)
-        eigvals, eigvecs = eigs(A, A.shape[0]-2)
+        A = self.A  # dimension = N+K
+        N = self.N
+        K = self.K
+        
+        # Extract k=N-K eigenvalues of largest magnitude (=LM)
+        # and corresponding eigenvectors of A 
+        # The eigenvalue 0 has algebraic multiplicity 2*K. We do not find those
+        # using this scipy.sparse.linalg.eigs routine 
+        eigvals, eigvecs = eigs(A, k=N-K, which='LM')
 
-        print(eigvals)
-        print('number of eigenvalues before ', eigvals.shape)
-        # Remove the eigenvectors corresponding to zero eigenvalue
-        eigvecs = eigvecs[:, eigvals > 0]
-        # Update the eigenvalues accordingly
-        eigvals = eigvals[eigvals > 0]
-        # Remove the eigenvectors corresponding to imaginary eigenvalue
-        eigvecs = eigvecs[:, eigvals.imag == 0]
-        # Update the eigenvalues accordingly
-        eigvals = eigvals[eigvals.imag == 0]
-        print('number of eigenvalues after ', eigvals.shape)
+        
+        #Make sure that all eigenvalues are real
+        assert np.allclose(np.imag(eigvals), np.zeros(N-K))
+        assert np.allclose(np.imag(eigvals), np.zeros(eigvals.shape))
+        
+        eigvals = np.real(eigvals)
+        eigvecs = np.real(eigvecs)
+        
+        print(np.sort(eigvals))  #sorting is for checking. Not needed mathematically
 
         return eigvals, eigvecs
+    
 
     def solver(self, times):
         # Input: times = numpy array of time steps [0,T]
