@@ -22,7 +22,7 @@
 # Dependencies
 #######
 from scipy.sparse import SparseEfficiencyWarning
-from scipy.sparse.linalg import inv
+from scipy.sparse.linalg import inv, eigs
 import numpy as np
 from meshes import *
 import warnings
@@ -70,12 +70,28 @@ class Eigenvalues:
     def get_eigen(self):
         # Calculates the eigenvalues and eigenvectors corresponding
         # to non-zero eigenvalues of A
-        # Returns: arrays of non-zero eigenvalues and corresponding
-        # eigenvectors
-        A = self.A.toarray()
-        eigvals, eigvecs = np.linalg.eig(A)
-        eigvals = eigvals[np.where(eigvals > 0)]
-        eigvecs = eigvecs[np.where(eigvals > 0)]
+        # Returns: arrays of non-zero eigenvalues and corresponding eigenvectors
+
+        # Attempt with numpy
+        # A = self.A.toarray()
+        # eigvals, eigvecs = np.linalg.eig(A)
+
+        # Attempt with sparse (scipy)
+        A = self.A
+        # Extract eigenvalues and eigenvectors to A (all but two)
+        eigvals, eigvecs = eigs(A, A.shape[0]-2)
+
+        print(eigvals)
+        print('number of eigenvalues before ', eigvals.shape)
+        # Remove the eigenvectors corresponding to zero eigenvalue
+        eigvecs = eigvecs[:, eigvals > 0]
+        # Update the eigenvalues accordingly
+        eigvals = eigvals[eigvals > 0]
+        # Remove the eigenvectors corresponding to imaginary eigenvalue
+        eigvecs = eigvecs[:, eigvals.imag == 0]
+        # Update the eigenvalues accordingly
+        eigvals = eigvals[eigvals.imag == 0]
+        print('number of eigenvalues after ', eigvals.shape)
 
         return eigvals, eigvecs
 
@@ -91,24 +107,27 @@ class Eigenvalues:
 
         # Make sure there exists N-K linearly independent
         # eigenvectors corresponding to positive eigenvalues
+
         assert isinstance(N-K, int)
         assert np.shape(eigvals)[0] == N-K
 
-        # initialize matrix to hold solution at time t in column t
+        # Initialize matrix to hold solution at time t in column t
         u = np.zeros((N+K, T))   # first N entries correspond to w, last K entries to mu
         w0 = self.w0    # initial values for w(0)
-        wp0 = self.wp0  # initial values for w'(0)
+        wp0 = self.wp0  # initial values for w'(0) (derivative w.r.t time)
         assert np.shape(w0)[0] == N
 
+        # Construct sum according to (ii) in Prop. 2 in script ev_method_numerical
         for k in range(N-K):
-            wk = eigvecs[k][:N]
+            wk = eigvecs[:N, k]
             assert np.linalg.norm(wk) != 0.0
+            assert np.shape(wk)[0] == N
 
             omegak = 1/np.sqrt(eigvals[k])
             alphak = (wk.T @ M @ w0)/(wk.T @ M @ wk)
             betak = (wk.T @ M @ wp0)/(wk.T @ M @ wk)
             # use outer product to keep the form of a matrix
-            u = u + np.outer(eigvecs[k], alphak*np.cos(omegak*times) + (betak/omegak)*np.sin(omegak*times))
+            u = u + np.outer(eigvecs[:, k], alphak*np.cos(omegak*times) + (betak/omegak)*np.sin(omegak*times))
 
         w = u[:N, :]
         mu = u[N:, :]
