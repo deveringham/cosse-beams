@@ -116,6 +116,7 @@ def get_q_loc(node_matrix, element_matrix, element_nr, q):
     return q_vec_loc
 
 
+
 def get_extended_S(node_matrix, element_matrix, E, I, two_sided_support=False):
     """
     Extend the stiffness matrix S
