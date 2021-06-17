@@ -1,3 +1,25 @@
+#######
+#  ______   ________       _       ____    ____   ______   
+# |_   _ \ |_   __  |     / \     |_   \  /   _|.' ____ \  
+#   | |_) |  | |_ \_|    / _ \      |   \/   |  | (___ \_| 
+#   |  __'.  |  _| _    / ___ \     | |\  /| |   _.____`.  
+#  _| |__) |_| |__/ | _/ /   \ \_  _| |_\/_| |_ | \____) | 
+# |_______/|________||____| |____||_____||_____| \______.' 
+#                                                         
+#######
+# Project Numerics, COSSE Programme 2021
+# Carsten van de Kamp, Sergi Andreu,
+# Sebastian Myrbäck, Dylan Everingham
+# 10.06.21
+#
+# Newmark.py
+# Classes representing FEM solutions with time discretization using Newmark's method to the 1D beam problem.
+#######
+
+
+#######
+# Dependencies
+#######
 from scipy.sparse.linalg import spsolve
 
 
@@ -35,7 +57,7 @@ class Newmark:
         self.f = f
         
         
-    def get_ustars(self, u, up, upp, h):
+    def __get_ustars(self, u, up, upp, h):
         ustar = u + h * up + (0.5 - self.beta) * upp * h**2
         ustarp = up + (1 - self.gamma) * upp * h
 
@@ -45,7 +67,7 @@ class Newmark:
     # we are using u = (x | mu)
     
     
-    def solver(self, ustar):
+    def __solver(self, ustar):
         # All matrices and vectors are given as numpy arrays
         rhs = self.f - self.Se @ ustar
         lhs = self.Me + self.beta * self.h**2 * self.Se
@@ -55,7 +77,7 @@ class Newmark:
         return upp
     
     
-    def get_next(self, ustar, upstar, upp, h):
+    def __get_next(self, ustar, upstar, upp, h):
         unext = ustar + self.beta * upp * h**2
         
         upnext = upstar + self.gamma * upp * h
@@ -78,13 +100,13 @@ class Newmark:
             
             t += h
             
-            ustar, upstar = self.get_ustars(u, up, upp, h)
+            ustar, upstar = self.__get_ustars(u, up, upp, h)
             
             # NOTE THAT THE SOLVER DOES NOT NEED ustarp
 
-            upp = self.solver(ustar)
+            upp = self.__solver(ustar)
             
-            u, up = self.get_next(ustar, upstar, upp, h)
+            u, up = self.__get_next(ustar, upstar, upp, h)
             
             if log_values:
                 
