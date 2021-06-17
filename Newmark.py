@@ -10,7 +10,7 @@
 # Project Numerics, COSSE Programme 2021
 # Carsten van de Kamp, Sergi Andreu,
 # Sebastian Myrbäck, Dylan Everingham
-# 10.06.21
+# 17.06.21
 #
 # Newmark.py
 # Classes representing FEM solutions with time discretization using Newmark's method to the 1D beam problem.
