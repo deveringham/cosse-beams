@@ -89,7 +89,6 @@ class Eigenvalues:
         # using this scipy.sparse.linalg.eigs routine 
         eigvals, eigvecs = eigs(A, k=N-K, which='LM')
 
-        
         #Make sure that all eigenvalues are real
         assert np.allclose(np.imag(eigvals), np.zeros(N-K))
         assert np.allclose(np.imag(eigvals), np.zeros(eigvals.shape))
@@ -97,8 +96,6 @@ class Eigenvalues:
         eigvals = np.real(eigvals)
         eigvecs = np.real(eigvecs)
         
-        print(np.sort(eigvals))  #sorting is for checking. Not needed mathematically
-
         return eigvals, eigvecs
     
 
