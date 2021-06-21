@@ -66,7 +66,9 @@ class Eigenvalues:
         # Matrix dimensions
         self.N = np.shape(self.M)[0]
         self.K = np.shape(self.Se)[0] - self.N
-        
+
+        self.eigvals, self.eigvecs = self.get_eigen()
+
         assert self.K == 2
 
     def get_eigen(self):
@@ -74,36 +76,47 @@ class Eigenvalues:
         # to non-zero eigenvalues of A
         # Returns: arrays of non-zero eigenvalues and corresponding eigenvectors
 
-        # Attempt with numpy
-        # A = self.A.toarray()
-        # eigvals, eigvecs = np.linalg.eig(A)
-
-        # Attempt with sparse (scipy)
-        A = self.A  # dimension = N+K
         N = self.N
         K = self.K
-        
+
+        ### ----- Attempt with numpy ----- ###
+        """A = self.A.toarray()
+        eigvals, eigvecs = np.linalg.eig(A)
+        idx = eigvals.argsort()[-(N-K):][::-1]
+        eigvals = eigvals[idx]
+        eigvecs = eigvecs[:, idx]"""
+
+        ### ----- Attempt with sparse (scipy) ----- #
         # Extract k=N-K eigenvalues of largest magnitude (=LM)
         # and corresponding eigenvectors of A 
         # The eigenvalue 0 has algebraic multiplicity 2*K. We do not find those
-        # using this scipy.sparse.linalg.eigs routine 
-        eigvals, eigvecs = eigs(A, k=N-K, which='LM')
+        # using this scipy.sparse.linalg.eigs routine
+        A = self.A  # dimension = N+K
+        eigvals, eigvecs = eigs(A, k=N-K, which='LM', tol=1e-16)
 
+<<<<<<< Updated upstream
         #Make sure that all eigenvalues are real
+=======
+        # Make sure that all eigenvalues are real
+>>>>>>> Stashed changes
         assert np.allclose(np.imag(eigvals), np.zeros(N-K))
         assert np.allclose(np.imag(eigvals), np.zeros(eigvals.shape))
         
         eigvals = np.real(eigvals)
         eigvecs = np.real(eigvecs)
+<<<<<<< Updated upstream
         
-        return eigvals, eigvecs
-    
+=======
 
-    def solver(self, times):
+>>>>>>> Stashed changes
+        return eigvals, eigvecs
+
+    def solver(self, times, get_nodes=False):
         # Input: times = numpy array of time steps [0,T]
         # Output: solutions matrices w and mu (time t at column t)
 
-        eigvals, eigvecs = self.get_eigen()
+        eigvals = self.eigvals
+        eigvecs = self.eigvecs
         N = self.N
         K = self.K
         M = self.M
@@ -121,19 +134,38 @@ class Eigenvalues:
         wp0 = self.wp0  # initial values for w'(0) (derivative w.r.t time)
         assert np.shape(w0)[0] == N
 
-        # Construct sum according to (ii) in Prop. 2 in script ev_method_numerical
+        ### Initialize eigennode matrix
+        w1 = eigvecs[:N, 0]     # first eigenvector
+        # parameters
+        omega1 = 1 / np.sqrt(eigvals[0])
+        alpha1 = (w1.T @ M @ w0) / (w1.T @ M @ w1)
+        beta1 = (w1.T @ M @ wp0) / (w1.T @ M @ w1)
+        # initialize u as a list containing the matrices
+        # of the different summands (vibration modes)
+        # for all time steps
+        u = [np.outer(eigvecs[:, 0], alpha1*np.cos(omega1*times) + (beta1/omega1)*np.sin(omega1*times))]
+
+        ### Construct sum according to (ii) in Prop. 2 in script ev_method_numerical
+
         for k in range(N-K):
             wk = eigvecs[:N, k]
             assert np.linalg.norm(wk) != 0.0
             assert np.shape(wk)[0] == N
 
+            # parameters
             omegak = 1/np.sqrt(eigvals[k])
             alphak = (wk.T @ M @ w0)/(wk.T @ M @ wk)
             betak = (wk.T @ M @ wp0)/(wk.T @ M @ wk)
-            # use outer product to keep the form of a matrix
-            u = u + np.outer(eigvecs[:, k], alphak*np.cos(omegak*times) + (betak/omegak)*np.sin(omegak*times))
 
-        w = u[:N, :]
-        mu = u[N:, :]
+            ###
+            # use outer product to keep the form of a matrix
+            u = np.append(u, [np.outer(eigvecs[:, k], alphak*np.cos(omegak*times)+(betak/omegak)*np.sin(omegak*times))],
+                          axis=0)
+
+        if get_nodes:
+            return u
+
+        w = np.sum(u, axis=0)[:N, :]
+        mu = np.sum(u, axis=0)[:N, :]
 
         return w, mu
