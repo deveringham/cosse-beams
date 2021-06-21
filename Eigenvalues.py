@@ -94,21 +94,14 @@ class Eigenvalues:
         A = self.A  # dimension = N+K
         eigvals, eigvecs = eigs(A, k=N-K, which='LM', tol=1e-16)
 
-<<<<<<< Updated upstream
-        #Make sure that all eigenvalues are real
-=======
         # Make sure that all eigenvalues are real
->>>>>>> Stashed changes
+
         assert np.allclose(np.imag(eigvals), np.zeros(N-K))
         assert np.allclose(np.imag(eigvals), np.zeros(eigvals.shape))
         
         eigvals = np.real(eigvals)
         eigvecs = np.real(eigvecs)
-<<<<<<< Updated upstream
-        
-=======
 
->>>>>>> Stashed changes
         return eigvals, eigvecs
 
     def solver(self, times, get_nodes=False):
