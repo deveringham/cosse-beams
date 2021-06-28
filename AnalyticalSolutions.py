@@ -21,40 +21,21 @@
 #######
 # Dependencies
 #######
+from Constants import *
 import numpy as np
 
 
 #######
 # AnalyticalSolution
-#   Private base class describing generalized analytical solutions to the 1D 
+#   Private base class describing generalized analytical solutions to the 1D
 #   beam problem with various types of boundary conditions.
 #######
 class _AnalyticalSolution:
 
     ###
-    # Constants - Default problem parameters
-    ###
-    DEFAULT_a = 0
-    DEFAULT_b = 0
-    DEFAULT_QL = 0
-    DEFAULT_M0 = 0
-    DEFAULT_ML = 0
-    DEFAULT_a0 = 0
-    DEFAULT_aL = 0
-    DEFAULT_case = 'arbitrary function'
-    DEFAULT_c = -0.01
-    DEFAULT_x0 = 0
-    DEFAULT_E = 1
-    DEFAULT_I = 1
-    DEFAULT_L = 1
-    DEFAULT_q = lambda x: x
-
-    ###
     # Constructor
     ###
-    def __init__(self, a=0, b=0, QL=0, M0=0, ML=0, a0=0, aL=0, 
-        case='arbitrary function', c=-0.01, x0=0, E=1, I=1, L=5,
-        q=lambda x: x):
+    def __init__(self, a, b, QL, M0, ML, a0, aL, case, c, x0, E, I, L, q):
     
         # Initialize member variables
         self.E, self.I = E, I
@@ -127,17 +108,17 @@ class _AnalyticalSolution:
 class AnalyticalSolutionCantilever(_AnalyticalSolution):
     
     def __init__(self, 
-        a = _AnalyticalSolution.DEFAULT_a,
-        b = _AnalyticalSolution.DEFAULT_b,
-        QL = _AnalyticalSolution.DEFAULT_QL,
-        ML = _AnalyticalSolution.DEFAULT_ML,
-        x0 = _AnalyticalSolution.DEFAULT_x0,
-        case = _AnalyticalSolution.DEFAULT_case,
-        c = _AnalyticalSolution.DEFAULT_c,
-        E = _AnalyticalSolution.DEFAULT_E,
-        I = _AnalyticalSolution.DEFAULT_I,
-        L = _AnalyticalSolution.DEFAULT_L,
-        q = _AnalyticalSolution.DEFAULT_q):
+        a = DEFAULT_a,
+        b = DEFAULT_b,
+        QL = DEFAULT_QL,
+        ML = DEFAULT_ML,
+        x0 = DEFAULT_x0,
+        case = DEFAULT_case,
+        c = DEFAULT_c,
+        E = DEFAULT_E,
+        I = DEFAULT_I,
+        L = DEFAULT_L,
+        q = DEFAULT_q):
 
         super().__init__(a=a, b=b, QL=QL, M0=0, ML=ML, a0=0, aL=0, x0=x0,
             case=case, c=c, E=E, I=I, L=L, q=q)
@@ -165,17 +146,17 @@ class AnalyticalSolutionCantilever(_AnalyticalSolution):
 class AnalyticalSolutionBothEnds(_AnalyticalSolution):
     
     def __init__(self,
-        a0 = _AnalyticalSolution.DEFAULT_a0,
-        aL = _AnalyticalSolution.DEFAULT_aL,
-        M0 = _AnalyticalSolution.DEFAULT_M0,
-        ML = _AnalyticalSolution.DEFAULT_ML,
-        x0 = _AnalyticalSolution.DEFAULT_x0,
-        case = _AnalyticalSolution.DEFAULT_case,
-        c = _AnalyticalSolution.DEFAULT_c,
-        E = _AnalyticalSolution.DEFAULT_E,
-        I = _AnalyticalSolution.DEFAULT_I,
-        L = _AnalyticalSolution.DEFAULT_L,
-        q = _AnalyticalSolution.DEFAULT_q):
+        a0 = DEFAULT_a0,
+        aL = DEFAULT_aL,
+        M0 = DEFAULT_M0,
+        ML = DEFAULT_ML,
+        x0 = DEFAULT_x0,
+        case = DEFAULT_case,
+        c = DEFAULT_c,
+        E = DEFAULT_E,
+        I = DEFAULT_I,
+        L = DEFAULT_L,
+        q = DEFAULT_q):
         
         super().__init__(a=0, b=0, QL=0, M0=M0, ML=ML, a0=a0, aL=aL, x0=x0,
             case=case, c=c, E=E, I=I, L=L, q=q)

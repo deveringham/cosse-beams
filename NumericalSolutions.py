@@ -21,6 +21,7 @@
 #######
 # Dependencies
 #######
+from Constants import *
 from scipy import integrate
 from scipy.sparse import csr_matrix, SparseEfficiencyWarning
 from scipy.sparse.linalg import spsolve
@@ -38,22 +39,6 @@ warnings.simplefilter('ignore', SparseEfficiencyWarning)
 #   problem with various types of boundary conditions.
 #######
 class _NumericalSolution:
-
-    ###
-    # Constants - Default problem parameters
-    ###
-    DEFAULT_a = 0
-    DEFAULT_b = 0
-    DEFAULT_QL = 0
-    DEFAULT_M0 = 0
-    DEFAULT_ML = 0
-    DEFAULT_a0 = 0
-    DEFAULT_aL = 0
-    DEFAULT_E = 1
-    DEFAULT_I = 1
-    DEFAULT_N = 25
-    DEFAULT_L = 1
-    DEFAULT_q = lambda x: x
 
     ###
     # Constructor
@@ -422,22 +407,18 @@ class _NumericalSolution:
 #######
 class NumericalSolutionCantilever(_NumericalSolution):
     def __init__(self, 
-        a = _NumericalSolution.DEFAULT_a,
-        b = _NumericalSolution.DEFAULT_b, 
-        QL = _NumericalSolution.DEFAULT_QL,
-        ML = _NumericalSolution.DEFAULT_ML,
-        E = _NumericalSolution.DEFAULT_E, 
-        I = _NumericalSolution.DEFAULT_I,
-        N = _NumericalSolution.DEFAULT_N, 
-        L = _NumericalSolution.DEFAULT_L, 
-        q = _NumericalSolution.DEFAULT_q):
+        a = DEFAULT_a,
+        b = DEFAULT_b, 
+        QL = DEFAULT_QL,
+        ML = DEFAULT_ML,
+        E = DEFAULT_E, 
+        I = DEFAULT_I,
+        N = DEFAULT_N, 
+        L = DEFAULT_L, 
+        q = DEFAULT_q):
 
         super().__init__(a=a, b=b, QL=QL, M0=0, ML=ML, a0=0, aL=0,
             E=E, I=I, N=N, L=L, q=q, two_sided_support=False)
-        
-    def return_S_ext(self):
-        
-        return super().__get_extended_S()
 
 
 #######
@@ -451,20 +432,15 @@ class NumericalSolutionCantilever(_NumericalSolution):
 #######
 class NumericalSolutionBothEnds(_NumericalSolution):
     def __init__(self,
-        M0 = _NumericalSolution.DEFAULT_M0,
-        ML = _NumericalSolution.DEFAULT_ML,
-        a0 = _NumericalSolution.DEFAULT_a0,
-        aL = _NumericalSolution.DEFAULT_aL,
-        E = _NumericalSolution.DEFAULT_E, 
-        I = _NumericalSolution.DEFAULT_I,
-        N = _NumericalSolution.DEFAULT_N, 
-        L = _NumericalSolution.DEFAULT_L, 
-        q = _NumericalSolution.DEFAULT_q):
+        M0 = DEFAULT_M0,
+        ML = DEFAULT_ML,
+        a0 = DEFAULT_a0,
+        aL = DEFAULT_aL,
+        E = DEFAULT_E, 
+        I = DEFAULT_I,
+        N = DEFAULT_N, 
+        L = DEFAULT_L, 
+        q = DEFAULT_q):
 
         super().__init__(a=0, b=0, QL=0, M0=M0, ML=ML, a0=a0, aL=aL,
             E=E, I=I, N=N, L=L, q=q, two_sided_support=True)
-        
-        
-    def return_S_ext(self):
-
-        return self.get_extended_S()
