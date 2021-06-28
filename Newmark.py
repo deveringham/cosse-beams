@@ -35,6 +35,7 @@ from meshes import *
 class Newmark:
     
     #The class Newmark lets an initial state (u1, up1, upp1) evolve dynamically using the Newmark method
+    #The notation is such that up is the derivative of u with respect to time
 
     def __init__(self, u1=0, up1=0, upp1=0, h=0.1, beta=1/4, gamma=1/2, Me=1,
                  Se=1, f=1):
@@ -61,7 +62,7 @@ class Newmark:
         # Dictionary of arrays containing all the intermediate values
         self.results = {"u": [self.u1], "up": [self.up1],
                         "upp": [self.upp1], "h": [0], "t": [0],
-                       "w":[self.u1[:-2][::2]], "wp":[self.u1[:-2][1::2]]}
+                       "w":[self.u1[:-2][::2]], "w_x":[self.u1[:-2][1::2]]}
         
         # Matrices and arrays needed for the solver
         self.Me = Me
@@ -121,7 +122,7 @@ class Newmark:
             u, up = self.__get_next(ustar, upstar, upp, h)
             
             w = u[:-2][::2]
-            wp = u[:-2][1::2] #In this case, the derivative is wrt the space variable
+            w_x = u[:-2][1::2] #In this case, the derivative is wrt the space variable
             
             
             if log_values:
@@ -132,7 +133,7 @@ class Newmark:
                 self.results["h"].append(h)
                 self.results["t"].append(t)
                 self.results["w"].append(w)
-                self.results["wp"].append(wp)
+                self.results["w_x"].append(w_x)
                 
         return u, up, upp, t
 
