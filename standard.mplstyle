@@ -1,0 +1,17 @@
+figure.figsize : 6.4, 4.8
+axes.titlesize : 20
+axes.labelsize : 18
+axes.linewidth : 1.2
+xtick.labelsize : 14
+ytick.labelsize : 14
+xtick.direction : in
+ytick.direction : in
+xtick.top : True
+ytick.right : True
+ytick.major.size  : 5
+xtick.major.size  : 5
+ytick.major.width  : 1.2
+xtick.major.width  : 1.2
+lines.linewidth : 2
+savefig.bbox : standard
+#image.aspect : equal
