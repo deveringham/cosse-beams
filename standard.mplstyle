@@ -2,16 +2,16 @@
 figure.figsize : 6.4, 4.8
 
 #FONTSIZE OF THE TITLE AND LABELS
-axes.titlesize : 20
+axes.titlesize : 22
 axes.labelsize : 18
 
-xtick.labelsize : 14
-ytick.labelsize : 14
+xtick.labelsize : 16
+ytick.labelsize : 16
 
 #SIZE OF THE AXIS LINES AND TICKS
 axes.linewidth : 1.2
-ytick.major.size  : 5
-xtick.major.size  : 5
+ytick.major.size  : 7
+xtick.major.size  : 7
 ytick.major.width  : 1.2
 xtick.major.width  : 1.2
 
@@ -21,21 +21,16 @@ ytick.direction : in
 xtick.top : True
 ytick.right : True
 
-#SIZE OF THE TICKS
-ytick.major.size  : 5
-xtick.major.size  : 5
-ytick.major.width  : 1.2
-xtick.major.width  : 1.2
-
-#SIZE OF THE LINES
+#SIZE OF THE LINES AND MARKERS
 lines.linewidth : 2
+lines.markersize : 8
 
 #SET TO tight / standard
 savefig.bbox : tight
 
 #USE LATEX FONT AS DEFAULT
 #THE FOLLOWING PARAMETER MAY BE CONVENIENT BUT CAUSE ERRORS
-#text.usetex : true
+text.usetex : true
 
 #UNCOMMENT THE FOLLOWING LINES IF text.usetex : true
 #font.family : serif
