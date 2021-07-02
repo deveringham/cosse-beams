@@ -185,8 +185,9 @@ class AnalyticalSolutionBothEnds(_AnalyticalSolution):
         EI = self.E * self.I
 
         c1 = self.a0
-        c3 = -self.M0/(2*EI)
-        c4 = (self.M0 + self.ML - self.q2(self.L))/(6*self.L*EI)
-        c2 = (self.aL - self.q4(self.L)/EI - c1 - c3*self.L**2 - c4*self.L**3)/self.L
+        c2 = (self.aL - self.a0)/self.L - (self.L/6*EI)*(2*self.M0 + self.ML - self.q2(self.L))\
+             - self.q4(self.L)/(EI*self.L)
+        c3 = self.M0/(2*EI)
+        c4 = (1/(6*EI*self.L))*(self.ML - self.q2(self.L) - self.M0)
         
         return [c1, c2, c3, c4]
