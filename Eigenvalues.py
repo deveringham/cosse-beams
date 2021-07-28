@@ -136,8 +136,8 @@ class Eigenvalues:
         # initialize u as a list containing the matrices
         # of the different summands (vibration modes)
         # for all time steps
-        u = [np.outer(eigvecs[:, 0], alpha1*np.cos(omega1*times) + (beta1/omega1)*np.sin(omega1*times))]
-
+        #u = [np.outer(eigvecs[:, 0], alpha1*np.cos(omega1*times) + (beta1/omega1)*np.sin(omega1*times))]
+        u = []
         ### Construct sum according to (ii) in Prop. 2 in script ev_method_numerical
 
         for k in range(N-K):
@@ -152,9 +152,10 @@ class Eigenvalues:
 
             ###
             # use outer product to keep the form of a matrix
-            u = np.append(u, [np.outer(eigvecs[:, k], alphak*np.cos(omegak*times)+(betak/omegak)*np.sin(omegak*times))],
-                          axis=0)
-
+            #u = np.append(u, [np.outer(eigvecs[:, k], alphak*np.cos(omegak*times)+(betak/omegak)*np.sin(omegak*times))],
+             #             axis=0)
+            u.append(np.outer(eigvecs[:, k], alphak*np.cos(omegak*times)+(betak/omegak)*np.sin(omegak*times)))
+            
         if get_nodes:
             return u
 
