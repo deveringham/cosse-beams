@@ -89,18 +89,14 @@ class Eigenvalues:
         # using this scipy.sparse.linalg.eigs routine 
         eigvals, eigvecs = eigs(A, k=N-K, which='LM')
 
-        
-        #Make sure that all eigenvalues are real
+        # Make sure that all eigenvalues are real
         assert np.allclose(np.imag(eigvals), np.zeros(N-K))
         assert np.allclose(np.imag(eigvals), np.zeros(eigvals.shape))
         
         eigvals = np.real(eigvals)
         eigvecs = np.real(eigvecs)
-        
-        print(np.sort(eigvals))  #sorting is for checking. Not needed mathematically
 
         return eigvals, eigvecs
-    
 
     def solver(self, times):
         # Input: times = numpy array of time steps [0,T]
@@ -110,7 +106,6 @@ class Eigenvalues:
         N = self.N
         K = self.K
         M = self.M
-        T = np.shape(times)[0]
 
         # Make sure there exists N-K linearly independent
         # eigenvectors corresponding to positive eigenvalues
@@ -119,10 +114,12 @@ class Eigenvalues:
         assert np.shape(eigvals)[0] == N-K
 
         # Initialize matrix to hold solution at time t in column t
-        u = np.zeros((N+K, T))   # first N entries correspond to w, last K entries to mu
         w0 = self.w0    # initial values for w(0)
         wp0 = self.wp0  # initial values for w'(0) (derivative w.r.t time)
         assert np.shape(w0)[0] == N
+
+        vib_modes_w = []
+        vib_modes_mu = []
 
         # Construct sum according to (ii) in Prop. 2 in script ev_method_numerical
         for k in range(N-K):
@@ -134,9 +131,20 @@ class Eigenvalues:
             alphak = (wk.T @ M @ w0)/(wk.T @ M @ wk)
             betak = (wk.T @ M @ wp0)/(wk.T @ M @ wk)
             # use outer product to keep the form of a matrix
-            u = u + np.outer(eigvecs[:, k], alphak*np.cos(omegak*times) + (betak/omegak)*np.sin(omegak*times))
 
-        w = u[:N, :]
-        mu = u[N:, :]
+            # create vibration modes corresponding to the solution w
+            # first N entries correspond to w, last K entries to mu
+            vib_modes_w.append(np.outer(eigvecs[:, k], alphak*np.cos(omegak*times)
+                               + (betak/omegak)*np.sin(omegak*times))[:N, :])
 
-        return w, mu
+            # create vibration modes corresponding to the solution mu
+            vib_modes_mu.append(np.outer(eigvecs[:, k], alphak * np.cos(omegak * times)
+                                + (betak / omegak) * np.sin(omegak * times))[N:, :])
+
+        # vib_modes is an array of matrices, where entry i corresponds to the ith vibration mode matrix,
+        # with every column representing the solution over the whole domain for a particular time step
+
+        vib_modes_w = np.asarray(vib_modes_w)
+        vib_modes_mu = np.asarray(vib_modes_mu)
+
+        return vib_modes_w, vib_modes_mu

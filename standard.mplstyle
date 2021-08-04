@@ -30,16 +30,16 @@ savefig.bbox : tight
 
 #USE LATEX FONT AS DEFAULT
 #THE FOLLOWING PARAMETER MAY BE CONVENIENT BUT CAUSE ERRORS
-#text.usetex : true
+text.usetex : true
 
 #UNCOMMENT THE FOLLOWING LINES IF text.usetex : true
-#font.family : serif
-#font.serif : Computer Modern Roman
-#font.sans-serif : Computer Modern Sans Serif
-#font.monospace : Computer Modern
+font.family : serif
+font.serif : Computer Modern Roman
+font.sans-serif : Computer Modern Sans Serif
+font.monospace : Computer Modern
 
 #OPTIONAL PARAMETERS
-#image.aspect : equal
+image.aspect : equal
 #savefig.directory : /figures
-#legend.loc : best
-#legend.fontsize : medium
+legend.loc : best
+legend.fontsize : medium
