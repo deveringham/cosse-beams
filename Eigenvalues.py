@@ -11,7 +11,7 @@
 # Project Numerics, COSSE Programme 2021
 # Carsten van de Kamp, Sergi Andreu,
 # Sebastian Myrbäck, Dylan Everingham
-# 28.06.21
+# 10.06.21
 #
 # Eigenvalues.py
 # Classes representing transient FEM solutions using eigenvalue analysis.
@@ -31,29 +31,34 @@ import warnings
 warnings.simplefilter('ignore', SparseEfficiencyWarning)
 
 #######
-# Eigenvalues
-#   Class describing solutions to the following beam problems with
-#   zero externam forces (i.e. q=0) with eigenvalue/vector analysis:
+# Eigenvalue
+#   Private base class solving the following beam
+#   problems with zero external forcess (i.e. q=0)
+#   with eigenvalue/eigenvector analysis:
 #
-#   1. Cantilever with (w(0))=b (w'(0))=ML=QL=0, i.e. (clamped at the left end
-#       and free at the right without bending moment or load)
-#   2. Simply supported beam with a=w(0)=w(L)=w''(0)=w''(L)=0,
-#       i.e. (no bending moment at end points)
+#   1. Cantilever with a (w(0))=b (w'(0))=ML=QL=0.
+#   (clamped at the left end and free at the
+#   right without bending moment or load)
+#   2. Simply supported beam with
+#       a=w(0)=w(L)=w''(0)=w''(L)=0
+#   (no bending moment at end points)
 #######
+
+
 class Eigenvalues:
 
     ###
     # Constructor
     ###
-    def __init__(self, w0, wp0, Me, Se):
+    def __init__(self, w0, wp0, M, Me, Se):
 
         # Set initial values of w
-        self.w0, self.wp0 = w0, wp0
+        self.w0 = w0
+        self.wp0 = wp0
 
         # Matrices and arrays needed for the solver
-
+        self.M = M      # mass matrix
         self.Me = Me    # extended mass matrix
-        self.M = self.Me[:-2,:-2]    # (non-extended) mass matrix
         self.Se = Se    # extended stiffness matrix
 
         self.A = inv(self.Se) @ self.Me    # eigenvalue operator
@@ -64,17 +69,10 @@ class Eigenvalues:
         
         assert self.K == 2
 
-    ###
-    # get_eigen
-    #   Method to calculate the nonzero eigenvalues of A and their
-    #       corresponding eigenvectors.
-    #
-    # arguments: none
-    # returns:
-    #   eigvals (List of float) : eigenvalues
-    #   eigvecs (2DList of float) : eigenvectors
-    ###
     def get_eigen(self):
+        # Calculates the eigenvalues and eigenvectors corresponding
+        # to non-zero eigenvalues of A
+        # Returns: arrays of non-zero eigenvalues and corresponding eigenvectors
 
         # Attempt with numpy
         # A = self.A.toarray()
@@ -86,54 +84,42 @@ class Eigenvalues:
         K = self.K
         
         # Extract k=N-K eigenvalues of largest magnitude (=LM)
-        # and corresponding eigenvectors of A. 
+        # and corresponding eigenvectors of A 
         # The eigenvalue 0 has algebraic multiplicity 2*K. We do not find those
         # using this scipy.sparse.linalg.eigs routine 
         eigvals, eigvecs = eigs(A, k=N-K, which='LM')
 
-        
         # Make sure that all eigenvalues are real
         assert np.allclose(np.imag(eigvals), np.zeros(N-K))
         assert np.allclose(np.imag(eigvals), np.zeros(eigvals.shape))
         
-        # Take real parts
         eigvals = np.real(eigvals)
         eigvecs = np.real(eigvecs)
-        
-        # Sorting is for checking. Not needed mathematically
-        #print(np.sort(eigvals))  
 
         return eigvals, eigvecs
-    
-    ###
-    # solve
-    #   Method to solve the system with eignvalue/vector analysis.
-    #
-    # arguments:
-    #   times (List of float) : list of timesteps [0,T]
-    # returns:
-    #   w, mu (2DLists of float) : solution matrices, timestep t at column t
-    ###
-    def solver(self, times):
 
-        # Get eigenvalues/vectors
+    def solver(self, times):
+        # Input: times = numpy array of time steps [0,T]
+        # Output: solutions matrices w and mu (time t at column t)
+
         eigvals, eigvecs = self.get_eigen()
         N = self.N
         K = self.K
         M = self.M
-        T = np.shape(times)[0]
 
         # Make sure there exists N-K linearly independent
         # eigenvectors corresponding to positive eigenvalues
+
         assert isinstance(N-K, int)
         assert np.shape(eigvals)[0] == N-K
 
         # Initialize matrix to hold solution at time t in column t
-        # First N entries correspond to w, last K entries to mu
-        u = np.zeros((N+K, T))
-        w0 = self.w0    # Initial values for w(0)
-        wp0 = self.wp0  # Initial values for w'(0) (derivative w.r.t time)
+        w0 = self.w0    # initial values for w(0)
+        wp0 = self.wp0  # initial values for w'(0) (derivative w.r.t time)
         assert np.shape(w0)[0] == N
+
+        vib_modes_w = []
+        vib_modes_mu = []
 
         # Construct sum according to (ii) in Prop. 2 in script ev_method_numerical
         for k in range(N-K):
@@ -144,11 +130,21 @@ class Eigenvalues:
             omegak = 1/np.sqrt(eigvals[k])
             alphak = (wk.T @ M @ w0)/(wk.T @ M @ wk)
             betak = (wk.T @ M @ wp0)/(wk.T @ M @ wk)
+            # use outer product to keep the form of a matrix
 
-            # Use outer product to keep the form of a matrix
-            u = u + np.outer(eigvecs[:, k], alphak*np.cos(omegak*times) + (betak/omegak)*np.sin(omegak*times))
+            # create vibration modes corresponding to the solution w
+            # first N entries correspond to w, last K entries to mu
+            vib_modes_w.append(np.outer(eigvecs[:, k], alphak*np.cos(omegak*times)
+                               + (betak/omegak)*np.sin(omegak*times))[:N, :])
 
-        w = u[:N, :]
-        mu = u[N:, :]
+            # create vibration modes corresponding to the solution mu
+            vib_modes_mu.append(np.outer(eigvecs[:, k], alphak * np.cos(omegak * times)
+                                + (betak / omegak) * np.sin(omegak * times))[N:, :])
 
-        return w, mu
+        # vib_modes is an array of matrices, where entry i corresponds to the ith vibration mode matrix,
+        # with every column representing the solution over the whole domain for a particular time step
+
+        vib_modes_w = np.asarray(vib_modes_w)
+        vib_modes_mu = np.asarray(vib_modes_mu)
+
+        return vib_modes_w, vib_modes_mu
