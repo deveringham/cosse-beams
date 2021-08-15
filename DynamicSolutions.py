@@ -60,14 +60,10 @@ class _Newmark:
 
         # Set timestep
         self.h = h
-
-        #self.uniform = True
-        #if not isinstance(self.h, float):
-        #    self.uniform = False
         
         # Set numerical parameters
-        assert beta > 0 and beta <=1/2
-        assert gamma > 0 and gamma <=1
+        assert beta > 0 and beta <= (1/2)
+        assert gamma > 0 and gamma <= 1
         self.beta, self.gamma = beta, gamma
         
         # Dictionary of arrays containing all the intermediate values
@@ -83,9 +79,9 @@ class _Newmark:
     # we are using u = (x | mu)
 
     def __get_ustars(self, u, up, upp):
+
         ustar = u + self.h * up + (0.5 - self.beta) * upp * self.h**2
         ustarp = up + (1 - self.gamma) * upp * self.h
-
         return ustar, ustarp
 
 	    
@@ -108,8 +104,6 @@ class _Newmark:
         
     
     def run(self, n, log_values=True):
-        
-        #assert self.uniform
         
         # Initialize the values at the initial b.c.
         u = self.u1

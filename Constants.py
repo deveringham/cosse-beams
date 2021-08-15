@@ -1,3 +1,4 @@
+#!/usr/bin/python
 #######
 #  ______   ________       _       ____    ____   ______   
 # |_   _ \ |_   __  |     / \     |_   \  /   _|.' ____ \  
@@ -31,15 +32,14 @@ DEFAULT_N = 25
 DEFAULT_L = 1
 DEFAULT_q = lambda x: x
 
-# Additional parameters for analytical soolutions, i.e. classes in
-# AnalyticalSolutions.py. Also use those above
+# Additional parameters for analytical solutions, i.e. classes in
+# AnalyticalSolutions.py. These also use the above parameters
 DEFAULT_case = 'arbitrary function'
 DEFAULT_c = -0.01
 DEFAULT_x0 = 0
 
 # For dynamic case FEM solvers only, i.e. classes in
 # DynamicSolutions.py
-
 DEFAULT_u1 = 0
 DEFAULT_up1 = 0
 DEFAULT_upp1 = 0

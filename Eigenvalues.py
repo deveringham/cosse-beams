@@ -30,6 +30,7 @@ import warnings
 # Turn off sparse matrix efficiency warnings
 warnings.simplefilter('ignore', SparseEfficiencyWarning)
 
+
 #######
 # Eigenvalue
 #   Private base class solving the following beam
@@ -69,15 +70,17 @@ class Eigenvalues:
         
         assert self.K == 2
 
+    ###
+    # get_eigen
+    #   Calculates the eigenvalues and eigenvectors corresponding to the
+    #   nonzero eigenvalues of A.
+    #
+    # arguments: none
+    # returns:
+    #   eigvals (float array) : list of eigenvalues
+    #   eigvecs (2D float array) : list of corresponding eigenvectors
+    ###
     def get_eigen(self):
-        # Calculates the eigenvalues and eigenvectors corresponding
-        # to non-zero eigenvalues of A
-        # Returns: arrays of non-zero eigenvalues and corresponding eigenvectors
-
-        # Attempt with numpy
-        # A = self.A.toarray()
-        # eigvals, eigvecs = np.linalg.eig(A)
-
         # Attempt with sparse (scipy)
         A = self.A  # dimension = N+K
         N = self.N
@@ -98,9 +101,17 @@ class Eigenvalues:
 
         return eigvals, eigvecs
 
-    def solver(self, times):
-        # Input: times = numpy array of time steps [0,T]
-        # Output: solutions matrices w and mu (time t at column t)
+    ###
+    # solve
+    #   Returns solution matrices w and mu.
+    #
+    # arguments:
+    #   times (float array) : array of time steps
+    # returns:
+    #   w (2D float array) : solution matrix
+    #   mu (2D float array) : derivative solution matrix
+    ###
+    def solve(self, times):
 
         eigvals, eigvecs = self.get_eigen()
         N = self.N
@@ -109,7 +120,6 @@ class Eigenvalues:
 
         # Make sure there exists N-K linearly independent
         # eigenvectors corresponding to positive eigenvalues
-
         assert isinstance(N-K, int)
         assert np.shape(eigvals)[0] == N-K
 
@@ -121,7 +131,7 @@ class Eigenvalues:
         vib_modes_w = []
         vib_modes_mu = []
 
-        # Construct sum according to (ii) in Prop. 2 in script ev_method_numerical
+        # Construct sum with (ii) in Prop. 2 in script ev_method_numerical
         for k in range(N-K):
             wk = eigvecs[:N, k]
             assert np.linalg.norm(wk) != 0.0
@@ -134,15 +144,18 @@ class Eigenvalues:
 
             # create vibration modes corresponding to the solution w
             # first N entries correspond to w, last K entries to mu
-            vib_modes_w.append(np.outer(eigvecs[:, k], alphak*np.cos(omegak*times)
-                               + (betak/omegak)*np.sin(omegak*times))[:N, :])
+            vib_modes_w.append(np.outer(eigvecs[:, k], 
+                alphak*np.cos(omegak*times)
+                + (betak/omegak)*np.sin(omegak*times))[:N, :])
 
             # create vibration modes corresponding to the solution mu
-            vib_modes_mu.append(np.outer(eigvecs[:, k], alphak * np.cos(omegak * times)
-                                + (betak / omegak) * np.sin(omegak * times))[N:, :])
+            vib_modes_mu.append(np.outer(eigvecs[:, k], 
+                alphak * np.cos(omegak * times)
+                + (betak / omegak) * np.sin(omegak * times))[N:, :])
 
-        # vib_modes is an array of matrices, where entry i corresponds to the ith vibration mode matrix,
-        # with every column representing the solution over the whole domain for a particular time step
+        # vib_modes is an array of matrices, where entry i corresponds to the 
+        # ith vibration mode matrix, with every column representing the solution 
+        # over the whole domain for a particular time step
 
         vib_modes_w = np.asarray(vib_modes_w)
         vib_modes_mu = np.asarray(vib_modes_mu)

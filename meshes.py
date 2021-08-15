@@ -17,11 +17,13 @@
 # Helper functions to generate meshes.
 #######
 
+
 #######
 # Dependencies
 #######
 import numpy as np
 import matplotlib.pyplot as plt
+
 
 #######
 # get_mesh_1D
