@@ -4,7 +4,7 @@ Project course in numerical analysis, on the topic of FEM simulation of the bend
 
 ### Structure
 
-* The full report pdf is found [here](Report_Numerical_Analysis_of_Vibrating_Beams.pdf). 
+* The full report pdf is found [here](Report/Report_Numerical_Analysis_of_Vibrating_Beams.pdf). 
 * **Attachment A** from the report contains the code. The code is found here in the repository, and the simulations are found in notebooks. Which notebooks that correspond to which parts in the report is presented below.
 
   1. **Static case**: The notebook for these simulations is in [notebook.ipynb](notebook.ipynb). The methods [meshes.py](meshes.py), [AnalyticalSolutions.py](AnalyticalSolutions.py) and [NumericalSolutions.py](NumericalSolutions.py) are used in this notebook. 
