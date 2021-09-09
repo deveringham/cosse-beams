@@ -30,7 +30,7 @@ savefig.bbox : tight
 
 #USE LATEX FONT AS DEFAULT
 #THE FOLLOWING PARAMETER MAY BE CONVENIENT BUT CAUSE ERRORS
-text.usetex : true
+text.usetex : false
 
 #UNCOMMENT THE FOLLOWING LINES IF text.usetex : true
 #font.family : serif
