@@ -24,6 +24,16 @@
 from Constants import *
 import numpy as np
 
+#######
+# Helper Functions
+#######
+
+def is_iterable(x):
+    try:
+        some_object_iterator = iter(x)
+    except TypeError as te:
+        return False
+    return True
 
 #######
 # AnalyticalSolution
@@ -48,16 +58,14 @@ class _AnalyticalSolution:
         
         # Handle special cases of q
         if self.case == "arbitrary function":
-
             # For arbitrary q given as a lambda, use quadrature to integrate 
             import scipy.integrate as integrate
-            self.q1 = lambda x: integrate.quad(self.q, 0, x)[0]
-            self.q2 = lambda x: integrate.quad(self.q1, 0, x)[0]
-            self.q3 = lambda x: integrate.quad(self.q2, 0, x)[0]
-            self.q4 = lambda x: integrate.quad(self.q3, 0, x)[0]
-
+            self.q1 = lambda x: np.array([integrate.quad(self.q, 0, xi)[0] for xi in x]) if is_iterable(x) else integrate.quad(self.q, 0, x)[0]
+            self.q2 = lambda x: np.array([integrate.quad(self.q1, 0, xi)[0] for xi in x]) if is_iterable(x) else integrate.quad(self.q1, 0, x)[0]
+            self.q3 = lambda x: np.array([integrate.quad(self.q2, 0, xi)[0] for xi in x]) if is_iterable(x) else integrate.quad(self.q2, 0, x)[0]
+            self.q4 = lambda x: np.array([integrate.quad(self.q3, 0, xi)[0] for xi in x]) if is_iterable(x) else integrate.quad(self.q3, 0, x)[0]
+        
         elif self.case == "constant":
-
             # For constant q, integrate analytically
             self.q1 = lambda x: c*x
             self.q2 = lambda x: c*np.power(x,2)/2
@@ -65,13 +73,12 @@ class _AnalyticalSolution:
             self.q4 = lambda x: c*np.power(x,4)/24
 
         elif self.case == "delta":
-
             # For q as a delta function, integrate analytically
-            self.q1 = lambda x: 0 if x<x0 else 1
-            self.q2 = lambda x: 0 if x<x0 else c*x
-            self.q3 = lambda x: 0 if x<x0 else c*x*x/2
-            self.q3 = lambda x: 0 if x<x0 else c*x*x*x/6
-            self.q4 = lambda x: 0 if x<x0 else c*x*x*x*x/24
+            self.q1 = lambda x: (x>x0)
+            self.q2 = lambda x: (x>x0) * c*x
+            self.q3 = lambda x: (x>x0) * c*x*x/2
+            self.q3 = lambda x: (x<x0) * c*x*x*x/6
+            self.q4 = lambda x: (x>x0) * c*x*x*x*x/24
     
     ###
     # solve
